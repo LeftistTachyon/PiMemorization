@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -45,6 +46,7 @@ public class Main {
 
         while (true) {
             Boolean exploring = null;
+            int cnt = 0;
 
             System.out.println("Do you want to explore the digits of pi? (Y/N)");
             while (exploring == null) {
@@ -52,6 +54,16 @@ public class Main {
                     case "Y":
                     case "y":
                         exploring = true;
+                        while (true) {
+                            System.out.println("From which digit of pi do you want to start exploring?");
+                            try {
+                                cnt = input.nextInt();
+                                break;
+                            } catch (InputMismatchException ime) {
+                                System.err.println("Please enter a valid number");
+                            }
+                        }
+                        input.nextLine();
                         break;
                     case "N":
                     case "n":
@@ -65,12 +77,13 @@ public class Main {
 
             System.out.println("Start listing the digits of pi!");
 
-            int cnt = 0;
             for (; cnt < pi.length();) {
                 char nextDigit = pi.charAt(cnt);
                 String nextInput = input.nextLine();
                 if ("EXIT".equalsIgnoreCase(nextInput)) {
                     if (cnt > pb) {
+                        System.out.println("Congrats! You beat your previous PB of "
+                                + pb + " digits!");
                         pb = cnt;
                     }
                     System.out.println("YOUR PB IS: " + pb + " digits");
@@ -80,9 +93,9 @@ public class Main {
                     break;
                 } else if (nextInput.length() != 1
                         || nextInput.charAt(0) != nextDigit) {
-                    System.out.println("Oops, the " + (cnt + 1)
-                            + " digit of pi is supposed to be " + nextDigit);
-                    System.out.println("You typed " + nextInput);
+                    System.out.println("Oops, digit " + (cnt + 1)
+                            + " of pi is supposed to be " + nextDigit);
+                    // System.out.println("You typed " + nextInput);
                     if (!exploring) {
                         break;
                     }
@@ -98,6 +111,8 @@ public class Main {
                 System.out.println("\nCongrats! You memorized the first " + cnt
                         + " digits of pi!");
                 if (cnt > pb) {
+                    System.out.println("Congrats! You beat your previous PB of "
+                            + pb + " digits!");
                     pb = cnt;
                 }
 
