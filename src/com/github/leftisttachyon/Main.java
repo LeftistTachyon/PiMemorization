@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 /**
  * The main class for this application
@@ -17,31 +19,48 @@ import java.util.Scanner;
 public class Main {
 
     /**
+     * The file where the digits of PI are stored
+     */
+    public static final File PI_FILE
+            = new File("src/com/github/leftisttachyon/resources/pi.dat");
+
+    /**
+     * The file where my PB is stored
+     */
+    public static final File PB_FILE
+            = new File("src/com/github/leftisttachyon/resources/pb.dat");
+
+    /**
      * The main method; the entry point for this application
      *
      * @param args the command line arguments
      * @throws IOException the standard IOException reasons
      */
     public static void main(String[] args) throws IOException {
-        File piFile = new File("src/com/github/leftisttachyon/resources/pi.dat");
-        StringBuilder builder = new StringBuilder();
-        try (BufferedReader piIn = new BufferedReader(new FileReader(piFile))) {
-            String line;
-            while ((line = piIn.readLine()) != null) {
-                builder.append(line);
-            }
-        }
+        JFrame frame = new JFrame();
+        frame.add(new PromptPanel("sdfsdf"));
+        frame.pack();
 
-        String pi = builder.toString();
+        frame.setResizable(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        /*String pi = getPi();
 
-        int pb;
-        File pbFile = new File("src/com/github/leftisttachyon/resources/pb.dat");
-        try (BufferedReader pbIn = new BufferedReader(new FileReader(pbFile))) {
-            pb = Integer.parseInt(pbIn.readLine());
-        } catch (NumberFormatException nfe) {
-            pb = 0;
-        }
+        int pb = getPB();
 
+        piMemorizationClassic(pi, pb);*/
+    }
+
+    /**
+     * The old, command line way of memorizing Pi. It's just not very good or
+     * pleasing to look at.
+     *
+     * @param pi the digits of pi, without the decimal point
+     * @param pb your pb
+     * @throws IOException the standard IOException reasons
+     */
+    private static void piMemorizationClassic(String pi, int pb)
+            throws IOException {
         Scanner input = new Scanner(System.in);
 
         while (true) {
@@ -136,6 +155,37 @@ public class Main {
                         break;
                 }
             }
+        }
+    }
+
+    /**
+     * Gets the digits of Pi from the PI file
+     *
+     * @return the digits of Pi, extracted from the Pi file
+     * @throws IOException the standard IOException rules
+     */
+    public static String getPi() throws IOException {
+        StringBuilder builder = new StringBuilder();
+        try (BufferedReader piIn = new BufferedReader(new FileReader(PI_FILE))) {
+            String line;
+            while ((line = piIn.readLine()) != null) {
+                builder.append(line);
+            }
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Gets your PB from the PB file
+     *
+     * @return your PB, extracted from the PB file
+     */
+    public static int getPB() {
+        try (BufferedReader pbIn = new BufferedReader(new FileReader(PB_FILE))) {
+            return Integer.parseInt(pbIn.readLine());
+        } catch (Exception ex) {
+            return 0;
         }
     }
 
