@@ -43,6 +43,8 @@ public final class PromptPanel extends JPanel {
      * @param question the question to prompt the user
      */
     public PromptPanel(String question) {
+        super();
+        
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         label = new JLabel(question);

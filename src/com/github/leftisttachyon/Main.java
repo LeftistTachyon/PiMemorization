@@ -1,5 +1,6 @@
 package com.github.leftisttachyon;
 
+import java.awt.Container;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,14 +10,13 @@ import java.io.PrintWriter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 /**
  * The main class for this application
  *
  * @author Jed Wang
  */
-public class Main {
+public final class Main extends JFrame {
 
     /**
      * The file where the digits of PI are stored
@@ -29,6 +29,28 @@ public class Main {
      */
     public static final File PB_FILE
             = new File("src/com/github/leftisttachyon/resources/pb.dat");
+    
+    /**
+     * The internal promptPanel
+     */
+    private PromptPanel promptPanel;
+    
+    /**
+     * Creates a new Main window.
+     */
+    public Main() {
+        super();
+        
+        Container contentPane = getContentPane();
+        
+        promptPanel = new PromptPanel("☺");
+        promptPanel.setVisible(false);
+        contentPane.add(promptPanel);
+        pack();
+
+        setResizable(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
 
     /**
      * The main method; the entry point for this application
@@ -37,13 +59,9 @@ public class Main {
      * @throws IOException the standard IOException reasons
      */
     public static void main(String[] args) throws IOException {
-        JFrame frame = new JFrame();
-        frame.add(new PromptPanel("sdfsdf"));
-        frame.pack();
-
-        frame.setResizable(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        Main main = new Main();
+        main.setVisible(true);
+        
         /*String pi = getPi();
 
         int pb = getPB();
