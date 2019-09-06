@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  * The main class for this application
@@ -29,23 +32,33 @@ public final class Main extends JFrame {
      */
     public static final File PB_FILE
             = new File("src/com/github/leftisttachyon/resources/pb.dat");
-    
+
     /**
-     * The internal promptPanel
+     * The internal PromptPanel
      */
     private PromptPanel promptPanel;
-    
+
+    /**
+     * The internal DrawPanel
+     */
+    private DrawPanel drawPanel;
+
     /**
      * Creates a new Main window.
      */
     public Main() {
         super();
-        
+
         Container contentPane = getContentPane();
-        
-        promptPanel = new PromptPanel("☺");
-        promptPanel.setVisible(false);
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+
+        promptPanel = new PromptPanel("Sans");
         contentPane.add(promptPanel);
+
+        drawPanel = new DrawPanel();
+        drawPanel.setDrawing(true);
+        contentPane.add(drawPanel);
+
         pack();
 
         setResizable(true);
@@ -57,11 +70,15 @@ public final class Main extends JFrame {
      *
      * @param args the command line arguments
      * @throws IOException the standard IOException reasons
+     * @throws InterruptedException random reasons
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,
+            InterruptedException {
         Main main = new Main();
         main.setVisible(true);
-        
+
+        main.startGame();
+
         /*String pi = getPi();
 
         int pb = getPB();
@@ -172,6 +189,66 @@ public final class Main extends JFrame {
                         System.err.println("Please enter a valid value.");
                         break;
                 }
+            }
+        }
+    }
+
+    /**
+     * Starts the game
+     * 
+     * @throws InterruptedException the standard reasons
+     * @throws IOException the standard IOException reasons
+     */
+    private void startGame() throws InterruptedException, IOException {
+        boolean exploring;
+        int cnt;
+
+        promptPanel.setVisible(true);
+        promptPanel.setQuestion("Do you want to explore the digits of pi?");
+        if (exploring = promptPanel.getNextClick()) {
+            while (true) {
+                String s = JOptionPane.showInputDialog(this,
+                        "From which digit of pi do you want to start exploring?",
+                        "Explore?",
+                        JOptionPane.PLAIN_MESSAGE);
+                try {
+                    cnt = Integer.parseInt(s);
+                    break;
+                } catch (InputMismatchException ime) {
+                    JOptionPane.showMessageDialog(this,
+                            "Please enter a valid number", "Invalid input",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+        promptPanel.setVisible(false);
+        
+        String pi = getPi();
+
+        for (; cnt < pi.length();) {
+            char nextDigit = pi.charAt(cnt);
+            String nextInput = input.nextLine();
+            if ("EXIT".equalsIgnoreCase(nextInput)) {
+                if (cnt > pb) {
+                    System.out.println("Congrats! You beat your previous PB of "
+                            + pb + " digits!");
+                    pb = cnt;
+                }
+                System.out.println("YOUR PB IS: " + pb + " digits");
+                exit(pb);
+            } else if ("STOP".equalsIgnoreCase(nextInput)) {
+                System.out.println("Stopping...");
+                break;
+            } else if (nextInput.length() != 1
+                    || nextInput.charAt(0) != nextDigit) {
+                System.out.println("Oops, digit " + (cnt + 1)
+                        + " of pi is supposed to be " + nextDigit);
+                // System.out.println("You typed " + nextInput);
+                if (!exploring) {
+                    break;
+                }
+            } else {
+                ++cnt;
             }
         }
     }

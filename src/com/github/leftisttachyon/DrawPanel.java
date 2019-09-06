@@ -1,14 +1,24 @@
 package com.github.leftisttachyon;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 /**
  * A JPanel which I draw in
@@ -23,12 +33,36 @@ public final class DrawPanel extends JPanel {
     private ScheduledExecutorService service = null;
 
     /**
+     * A list of characters
+     */
+    private ArrayList<DrawableCharacter> characters = null;
+
+    /**
      * Creates a new DrawPanel.
      */
     public DrawPanel() {
         super();
 
         setPreferredSize(new Dimension(500, 500));
+
+        int condition = JComponent.WHEN_IN_FOCUSED_WINDOW;
+        InputMap inMap = getInputMap(condition);
+        ActionMap actMap = getActionMap();
+
+        for (char c = '0'; c <= '9'; c++) {
+            String s = String.valueOf(c);
+            inMap.put(KeyStroke.getKeyStroke(c), s);
+
+            final char cc = c;
+            actMap.put(s, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println(s);
+                    characters.add(new DrawableCharacter(cc));
+                    System.out.println(characters);
+                }
+            });
+        }
     }
 
     /**
@@ -40,32 +74,44 @@ public final class DrawPanel extends JPanel {
         if (isDrawing) {
             service = Executors.newSingleThreadScheduledExecutor();
             service.scheduleAtFixedRate(this::repaint,
-                    0, 150, TimeUnit.MILLISECONDS);
+                    0, 15, TimeUnit.MILLISECONDS);
+
+            characters = new ArrayList<>();
         } else {
             service.shutdown();
             service = null;
+
+            characters = null;
         }
     }
 
     @Override
     public void paint(Graphics g) {
         try {
-            super.paint(g);
+            if (characters != null) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, getWidth(), getHeight());
 
+                Graphics2D g2D = (Graphics2D) g;
+
+                for (int i = characters.size() - 1; i >= 0; i--) {
+                    DrawableCharacter dChar = characters.get(i);
+                    dChar.paint(g2D);
+
+                    if (!dChar.isDrawn()) {
+                        characters.remove(i);
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * The height of CHAR_FONT (?)
-     */
-    private static final int CHAR_FONT_HEIGHT = 60;
-
-    /**
      * The font to use for drawing characters
      */
-    private static final Font CHAR_FONT = new Font("Segoe UI", CHAR_FONT_HEIGHT, Font.PLAIN);
+    private static final Font CHAR_FONT = new Font("Segoe UI", Font.PLAIN, 60);
 
     /**
      * A character that I can draw
@@ -75,22 +121,22 @@ public final class DrawPanel extends JPanel {
         /**
          * The character to draw
          */
-        private final char character;
+        private final String character;
 
         /**
          * The coordinates of the character
          */
-        private int x, y;
+        private float x, y;
 
         /**
          * x and y velocities
          */
-        private final int dx, dy;
+        private final float dx, dy;
 
         /**
          * The amount of opacity
          */
-        private int opacity;
+        private float opacity;
 
         /**
          * Creates a new DrawableCharacter given the parameters.
@@ -100,14 +146,14 @@ public final class DrawPanel extends JPanel {
          * @param y the y-coordinate to start at
          */
         public DrawableCharacter(char c, int x, int y) {
-            character = c;
+            character = String.valueOf(c);
             this.x = x;
             this.y = y;
 
-            dx = (int) (Math.random() * 4 - 2);
-            dy = (int) (Math.random() * 4 - 2);
+            dx = (float) (Math.random() * 4 - 2);
+            dy = (float) (Math.random() * 4 - 2);
 
-            opacity = 255;
+            opacity = 1.0f;
         }
 
         /**
@@ -125,10 +171,42 @@ public final class DrawPanel extends JPanel {
          * @param g2D the Graphics2D object to use
          */
         public void paint(Graphics2D g2D) {
-            g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+            if (opacity <= 0) {
+                return;
+            }
+
+            g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            
-            
+            g2D.setFont(CHAR_FONT);
+
+            Color color = new Color(0, 0, 0, opacity);
+            g2D.setColor(color);
+
+            FontMetrics metrics = g2D.getFontMetrics();
+            int height = metrics.getHeight(),
+                    width = metrics.stringWidth(character);
+
+            g2D.drawString(character, x - width / 2, y + height / 4);
+
+            // update
+            x += dx;
+            y += dy;
+
+            opacity -= 0.008f;
+        }
+
+        /**
+         * Determines whether the character is still being drawn
+         *
+         * @return whether the character is still being drawn
+         */
+        public boolean isDrawn() {
+            return opacity > 0;
+        }
+
+        @Override
+        public String toString() {
+            return "Drawable " + character + " x=" + x + " y=" + y;
         }
     }
 }
