@@ -9,4 +9,4 @@ The following is a table of my personal bests.
 |:-----------------:|:-------:|
 |August 17th, 2019  |22 digits|
 |September 6th, 2019|25 digits|
-|September 7th, 2019|34 digits|
+|September 7th, 2019|37 digits|
