@@ -13,3 +13,4 @@ The following is a table of my personal bests.
 |September 7th, 2019|1:40 PM|37 digits|
 |                   |1:51 PM|38 digits|
 |                   |1:56 PM|43 digits|
+|                   |4:25 PM|51 digits|
