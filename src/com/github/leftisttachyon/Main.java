@@ -1,6 +1,10 @@
 package com.github.leftisttachyon;
 
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,22 +48,58 @@ public final class Main extends JFrame {
     private DrawPanel drawPanel;
 
     /**
+     * The digits of pi
+     */
+    private final String PI;
+
+    /**
+     * The user's PB
+     */
+    private int pb = getPB();
+
+    /**
      * Creates a new Main window.
      */
     public Main() {
-        super();
+        super("Pi Memorization!");
+
+        String tempPi = null;
+        try {
+            tempPi = getPi();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            PI = tempPi;
+        }
 
         Container contentPane = getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
+        contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
+
         promptPanel = new PromptPanel("Sans");
         contentPane.add(promptPanel);
+
+        contentPane.add(Box.createRigidArea(new Dimension(0, 10)));
 
         drawPanel = new DrawPanel();
         drawPanel.setDrawing(true);
         contentPane.add(drawPanel);
 
+        contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
+
         pack();
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    exit(pb);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -195,61 +235,89 @@ public final class Main extends JFrame {
 
     /**
      * Starts the game
-     * 
+     *
      * @throws InterruptedException the standard reasons
      * @throws IOException the standard IOException reasons
      */
     private void startGame() throws InterruptedException, IOException {
-        boolean exploring;
-        int cnt;
+        while (true) {
+            boolean exploring;
+            int cnt = 0;
 
-        promptPanel.setVisible(true);
-        promptPanel.setQuestion("Do you want to explore the digits of pi?");
-        if (exploring = promptPanel.getNextClick()) {
-            while (true) {
-                String s = JOptionPane.showInputDialog(this,
-                        "From which digit of pi do you want to start exploring?",
-                        "Explore?",
-                        JOptionPane.PLAIN_MESSAGE);
-                try {
-                    cnt = Integer.parseInt(s);
-                    break;
-                } catch (InputMismatchException ime) {
-                    JOptionPane.showMessageDialog(this,
-                            "Please enter a valid number", "Invalid input",
-                            JOptionPane.ERROR_MESSAGE);
+            promptPanel.setVisible(true);
+            promptPanel.setQuestion("Do you want to explore the digits of pi?");
+            if (exploring = promptPanel.getNextClick()) {
+                while (true) {
+                    String s = JOptionPane.showInputDialog(this,
+                            "From which digit of pi do you want to start exploring?",
+                            "Explore?",
+                            JOptionPane.PLAIN_MESSAGE);
+                    try {
+                        cnt = Integer.parseInt(s) + 1;
+                        break;
+                    } catch (InputMismatchException | NumberFormatException e) {
+                        JOptionPane.showMessageDialog(this,
+                                "Please enter a valid number", "Invalid input",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
-        }
-        promptPanel.setVisible(false);
-        
-        String pi = getPi();
+            promptPanel.setVisible(false);
 
-        for (; cnt < pi.length();) {
-            char nextDigit = pi.charAt(cnt);
-            String nextInput = input.nextLine();
-            if ("EXIT".equalsIgnoreCase(nextInput)) {
-                if (cnt > pb) {
-                    System.out.println("Congrats! You beat your previous PB of "
-                            + pb + " digits!");
-                    pb = cnt;
-                }
-                System.out.println("YOUR PB IS: " + pb + " digits");
-                exit(pb);
-            } else if ("STOP".equalsIgnoreCase(nextInput)) {
-                System.out.println("Stopping...");
-                break;
-            } else if (nextInput.length() != 1
-                    || nextInput.charAt(0) != nextDigit) {
-                System.out.println("Oops, digit " + (cnt + 1)
-                        + " of pi is supposed to be " + nextDigit);
-                // System.out.println("You typed " + nextInput);
-                if (!exploring) {
+            for (; cnt < PI.length();) {
+                char nextDigit = PI.charAt(cnt);
+                int next = drawPanel.getNextPress();
+                if (next == KeyEvent.VK_ESCAPE) {
+                    if (cnt > pb) {
+                        JOptionPane.showMessageDialog(this,
+                                "Congrats! You beat your previous PB of "
+                                + pb + " digits! Your PB is now "
+                                + (pb = cnt) + "digits",
+                                "New PB!", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    exit(pb);
+                } else if (next == KeyEvent.VK_PAUSE) {
+                    JOptionPane.showMessageDialog(this, "Succesfully stopped",
+                            "Stopping...",
+                            JOptionPane.INFORMATION_MESSAGE);
                     break;
+                } else if (next != nextDigit) {
+                    JOptionPane.showMessageDialog(this, "Oops, digit " + (cnt + 1)
+                            + " of pi is supposed to be " + nextDigit,
+                            "Oops!", JOptionPane.WARNING_MESSAGE);
+                    // System.out.println("You typed " + nextInput);
+                    if (!exploring) {
+                        break;
+                    }
+                } else {
+                    ++cnt;
                 }
+            }
+
+            if (exploring) {
+                JOptionPane.showMessageDialog(this,
+                        "Congrats! You explored the first " + cnt
+                        + " digits of pi!",
+                        "Congrats!", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                ++cnt;
+                JOptionPane.showMessageDialog(this,
+                        "Congrats! You memorized the first " + cnt
+                        + " digits of pi!",
+                        "Congrats!", JOptionPane.INFORMATION_MESSAGE);
+                if (cnt > pb) {
+                    JOptionPane.showMessageDialog(this,
+                            "Wow! You beat your previous PB of "
+                            + pb + " digits! Your new PB is " + (pb = cnt) + " digits",
+                            "New PB!", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
+
+            promptPanel.setVisible(true);
+            promptPanel.setQuestion("Do you want to try again?");
+            if (!promptPanel.getNextClick()) {
+                exit(pb);
+            }
+            promptPanel.setVisible(false);
         }
     }
 

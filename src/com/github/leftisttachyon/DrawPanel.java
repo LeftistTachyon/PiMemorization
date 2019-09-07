@@ -38,6 +38,11 @@ public final class DrawPanel extends JPanel {
     private ArrayList<DrawableCharacter> characters = null;
 
     /**
+     * Stores the last key pressed.
+     */
+    private int lastKeyPressed = -1;
+
+    /**
      * Creates a new DrawPanel.
      */
     public DrawPanel() {
@@ -49,6 +54,28 @@ public final class DrawPanel extends JPanel {
         InputMap inMap = getInputMap(condition);
         ActionMap actMap = getActionMap();
 
+        inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Escape");
+        actMap.put("Escape", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastKeyPressed = KeyEvent.VK_ESCAPE;
+                synchronized (DrawPanel.this) {
+                    DrawPanel.this.notifyAll();
+                }
+            }
+        });
+        
+        inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAUSE, 0), "Pause");
+        actMap.put("Pause", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lastKeyPressed = KeyEvent.VK_PAUSE;
+                synchronized (DrawPanel.this) {
+                    DrawPanel.this.notifyAll();
+                }
+            }
+        });
+
         for (char c = '0'; c <= '9'; c++) {
             String s = String.valueOf(c);
             inMap.put(KeyStroke.getKeyStroke(c), s);
@@ -57,9 +84,11 @@ public final class DrawPanel extends JPanel {
             actMap.put(s, new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println(s);
                     characters.add(new DrawableCharacter(cc));
-                    System.out.println(characters);
+                    lastKeyPressed = cc;
+                    synchronized (DrawPanel.this) {
+                        DrawPanel.this.notifyAll();
+                    }
                 }
             });
         }
@@ -106,6 +135,20 @@ public final class DrawPanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Gets the next key press that is listened to
+     *
+     * @return the next key press that is listened to
+     * @throws InterruptedException if the wait() method is interrupted
+     */
+    public int getNextPress() throws InterruptedException {
+        synchronized (this) {
+            this.wait();
+        }
+
+        return lastKeyPressed;
     }
 
     /**
