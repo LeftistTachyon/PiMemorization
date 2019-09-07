@@ -253,8 +253,14 @@ public final class Main extends JFrame {
                             "Explore?",
                             JOptionPane.PLAIN_MESSAGE);
                     try {
-                        cnt = Integer.parseInt(s) + 1;
-                        break;
+                        cnt = Integer.parseInt(s) - 1;
+                        if (cnt < 0 || cnt >= PI.length()) {
+                            JOptionPane.showMessageDialog(this,
+                                    "Please enter a valid number", "Invalid input",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            break;
+                        }
                     } catch (InputMismatchException | NumberFormatException e) {
                         JOptionPane.showMessageDialog(this,
                                 "Please enter a valid number", "Invalid input",
@@ -277,9 +283,6 @@ public final class Main extends JFrame {
                     }
                     exit(pb);
                 } else if (next == KeyEvent.VK_PAUSE) {
-                    JOptionPane.showMessageDialog(this, "Succesfully stopped",
-                            "Stopping...",
-                            JOptionPane.INFORMATION_MESSAGE);
                     break;
                 } else if (next != nextDigit) {
                     JOptionPane.showMessageDialog(this, "Oops, digit " + (cnt + 1)
