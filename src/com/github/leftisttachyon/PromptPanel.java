@@ -36,6 +36,11 @@ public final class PromptPanel extends JPanel {
      * The last clicked value
      */
     private boolean lastClicked = false;
+    
+    /**
+     * The button box
+     */
+    private final Box buttonBox;
 
     /**
      * Creates a new PromptPanel
@@ -44,7 +49,7 @@ public final class PromptPanel extends JPanel {
      */
     public PromptPanel(String question) {
         super();
-        
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         label = new JLabel(question);
@@ -72,14 +77,14 @@ public final class PromptPanel extends JPanel {
 
         add(Box.createRigidArea(new Dimension(0, 10)));
 
-        Box buttonPanel = Box.createHorizontalBox();
-        buttonPanel.add(Box.createHorizontalGlue());
-        buttonPanel.add(yesButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        buttonPanel.add(noButton);
-        buttonPanel.add(Box.createHorizontalGlue());
+        buttonBox = Box.createHorizontalBox();
+        buttonBox.add(Box.createHorizontalGlue());
+        buttonBox.add(yesButton);
+        buttonBox.add(Box.createRigidArea(new Dimension(10, 0)));
+        buttonBox.add(noButton);
+        buttonBox.add(Box.createHorizontalGlue());
 
-        add(buttonPanel);
+        add(buttonBox);
         add(Box.createRigidArea(new Dimension(0, 5)));
     }
 
@@ -128,5 +133,14 @@ public final class PromptPanel extends JPanel {
      */
     public void setQuestion(String question) {
         label.setText(question);
+    }
+
+    /**
+     * Sets whether the button box should be visible
+     *
+     * @param visible whether the button box should be visible
+     */
+    public void setButtonBoxVisible(boolean visible) {
+        buttonBox.setVisible(visible);
     }
 }

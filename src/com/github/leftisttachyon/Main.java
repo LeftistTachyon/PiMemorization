@@ -2,6 +2,7 @@ package com.github.leftisttachyon;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 /**
@@ -40,12 +42,17 @@ public final class Main extends JFrame {
     /**
      * The internal PromptPanel
      */
-    private PromptPanel promptPanel;
+    private final PromptPanel promptPanel;
 
     /**
      * The internal DrawPanel
      */
-    private DrawPanel drawPanel;
+    private final DrawPanel drawPanel;
+    
+    /**
+     * The label at the bottom of this window
+     */
+    private final JLabel bottomLabel;
 
     /**
      * The digits of pi
@@ -85,6 +92,12 @@ public final class Main extends JFrame {
         drawPanel = new DrawPanel();
         drawPanel.setDrawing(true);
         contentPane.add(drawPanel);
+        
+        contentPane.add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        bottomLabel = new JLabel();
+        bottomLabel.setFont(new Font("Segoe UI", Font.PLAIN, 24));
+        contentPane.add(bottomLabel);
 
         contentPane.add(Box.createRigidArea(new Dimension(0, 5)));
 
@@ -362,8 +375,7 @@ public final class Main extends JFrame {
      * @throws IOException the standard IOException reasons
      */
     private static void exit(int pb) throws IOException {
-        File pbFile = new File("src/com/github/leftisttachyon/resources/pb.dat");
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(pbFile,
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(PB_FILE,
                 false))) {
             out.println(pb);
         }
